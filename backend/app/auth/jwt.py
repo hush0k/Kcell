@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, UTC
 from typing import Optional
 
 from fastapi import HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,28 +19,28 @@ class AuthService:
 
     def create_access_token(self, user_id: int) -> str:
         expire = datetime.now(UTC) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=settings.jwt_access_token_expire_minutes
         )
         payload = TokenPayload(
             sub=str(user_id), exp=int(expire.timestamp()), type="access"
         )
         return jwt.encode(
-            payload.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM
+            payload.model_dump(), settings.jwt_secret_key, algorithm=settings.jwt_algorithm
         )
 
     def create_refresh_token(self, user_id: int) -> str:
-        expire = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(UTC) + timedelta(days=settings.jwt_refresh_token_expire_days)
         payload = TokenPayload(
             sub=str(user_id), exp=int(expire.timestamp()), type="refresh"
         )
         return jwt.encode(
-            payload.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM
+            payload.model_dump(), settings.jwt_secret_key, algorithm=settings.jwt_algorithm
         )
 
     def verify_token(self, token: str, token_type: str) -> Optional[TokenPayload]:
         try:
             payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+                token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
             )
             token_data = TokenPayload(**payload)
 
@@ -52,8 +52,8 @@ class AuthService:
             return None
 
 
-    async def authenticate_user(self, login: str, password: str) -> Optional[User]:
-        result = await self.db.execute(select(User).where(User.login == login))
+    async def authenticate_user(self, username: str, password: str) -> Optional[User]:
+        result = await self.db.execute(select(User).where(User.username == username))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -71,7 +71,7 @@ class AuthService:
         if not token_data:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный токен или токен истёк",
+                detail="Invalid authentication credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
@@ -84,7 +84,7 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Пользователь не найден",
+                detail="User not found",
             )
 
         return user
@@ -94,7 +94,7 @@ class AuthService:
         if not token_data:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Невалидный refresh token"
+                detail="Invalid refresh token"
             )
         return self.create_access_token(int(token_data.sub))
 
