@@ -1,6 +1,6 @@
 import type { LoginRequest, RegisterRequest, Task, TaskList, TaskStatus, Token, User } from '../types';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = (import.meta.env.VITE_API_URL as string) ?? '';
 
 function getAccessToken(): string | null {
   return localStorage.getItem('access_token');
