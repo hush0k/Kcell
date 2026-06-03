@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
 from app.models.mixins import TimestampMixin
@@ -7,9 +8,7 @@ from app.models.mixins import TimestampMixin
 class User(Base, TimestampMixin):
     __tablename__ = "user"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
-    username = Column(String, unique=True, index=True, nullable=False)
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
+    username: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
