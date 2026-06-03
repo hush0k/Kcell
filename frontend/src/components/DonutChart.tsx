@@ -1,4 +1,4 @@
-const PATH_LENGTH = 327;
+import { PieChart, Pie, Cell } from 'recharts';
 
 interface Props {
   done: number;
@@ -7,28 +7,37 @@ interface Props {
 
 export function DonutChart({ done, total }: Props) {
   const pct = total ? Math.round((done / total) * 100) : 0;
-  const arc = (pct / 100) * PATH_LENGTH;
   const pending = total - done;
+
+  const data = [
+    { value: done || 0 },
+    { value: pending || 1 },
+  ];
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-[168px] h-[168px]">
-        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-          <circle cx="60" cy="60" r="52" fill="none" stroke="#ece4f4" strokeWidth="14" />
-          <circle
-            cx="60"
-            cy="60"
-            r="52"
-            fill="none"
-            stroke="#8a1bd1"
-            strokeWidth="14"
-            strokeLinecap="round"
-            strokeDasharray={`${arc} ${PATH_LENGTH}`}
-            pathLength={PATH_LENGTH}
-            className="transition-[stroke-dasharray] duration-700 ease-[cubic-bezier(.4,0,.2,1)]"
-          />
-        </svg>
-        <div className="absolute inset-0 grid place-items-center text-center">
+      <div className="relative">
+        <PieChart width={168} height={168}>
+          <Pie
+            data={data}
+            cx={84}
+            cy={84}
+            innerRadius={52}
+            outerRadius={66}
+            startAngle={90}
+            endAngle={-270}
+            dataKey="value"
+            animationBegin={0}
+            animationDuration={700}
+            animationEasing="ease-in-out"
+            strokeWidth={0}
+          >
+            <Cell fill="#8a1bd1" />
+            <Cell fill="#ece4f4" />
+          </Pie>
+        </PieChart>
+
+        <div className="absolute inset-0 grid place-items-center text-center pointer-events-none">
           <div>
             <div className="text-[34px] font-extrabold leading-none tracking-tight">{pct}%</div>
             <div className="text-[11.5px] font-semibold text-muted mt-[3px] uppercase tracking-[.05em]">выполнено</div>
