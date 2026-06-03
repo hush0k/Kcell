@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { FormField } from './FormField';
+import { PasswordField } from './PasswordField';
 import { Toast } from './Toast';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
@@ -61,11 +62,9 @@ export function LoginPage() {
             onChange={e => setUsername(e.target.value)}
             error={errors.username}
           />
-          <FormField
+          <PasswordField
             label="Пароль"
             id="password"
-            type="password"
-            placeholder="••••••••"
             autoComplete="current-password"
             value={password}
             onChange={e => setPassword(e.target.value)}

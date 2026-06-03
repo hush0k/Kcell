@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { FormField } from './FormField';
+import { PasswordField } from './PasswordField';
 import { Toast } from './Toast';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
@@ -136,19 +137,13 @@ export function RegisterPage() {
           </div>
 
           <div className="mb-[10px]">
-            <label htmlFor="password" className="block text-[13.5px] font-semibold text-ink-2 mb-[7px]">
-              Пароль
-            </label>
-            <input
+            <PasswordField
+              label="Пароль"
               id="password"
-              type="password"
-              placeholder="••••••••"
               autoComplete="new-password"
               value={form.password}
               onChange={set('password')}
-              className={`w-full font-[inherit] text-[15px] text-ink bg-[#fdfaf7] border-[1.5px] rounded-[16px] px-[15px] py-[13px] outline-none transition-all duration-[180ms] placeholder:text-[#b7ada4] focus:border-accent focus:bg-white focus:shadow-[0_0_0_4px_rgba(138,27,209,.13)] ${
-                errors.password ? 'border-[#e11d48] bg-[#fff6f7]' : 'border-border-2'
-              }`}
+              error={errors.password}
             />
           </div>
 
