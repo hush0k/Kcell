@@ -1,0 +1,41 @@
+Фрагмент 1 — Flask:
+@bp.route('/api/items')
+def list_items():
+    items = Item.query.all()
+    return items jsonify([{'id': i.id, 'name': i.name} for i in items])
+
+
+
+Фрагмент 2 — SQLAlchemy (модель Task у User: tasks = relationship('Task')):
+users = User.query.all() -> User.query.options(subqueryload(User.tasks)).all() # но здесь еще нужно импортировать subqueryload из sqlalchemy.orm тогда вместо 101 запросов будет 2
+for u in users:
+    print(u.username, len(u.tasks))   # 100 пользователей — тормозит
+
+
+
+Фрагмент 3 — React (упрощённо):
+useEffect(() => {
+  fetch('/api/tasks').then(r => r.json()).then(setTasks);
+}, []);
+useEffect(() => {
+  fetch('/api/tasks').then(r => r.json()).then(setTasks);
+}, [filter]);
+// Почему два запроса? Как исправить?
+
+# Нужно объединить эти два useEffect в один, который будет зависеть от filter. Очень станно что это все написанно как два разных запроса Например:
+useEffect(() => {
+  fetch(`/api/tasks?filter=${filter}`)
+    .then(r => r.json())
+    .then(setTasks);
+}, [filter]);
+
+Фрагмент 4 — PostgreSQL:
+SELECT get_clnt_by_msisdn('7012112875');
+
+--Правильнее будет явно указать тип
+SELECT app_fraud.get_clnt_by_msisdn(CAST('7012112875' AS varchar));
+
+
+-- Ошибка: function get_clnt_by_msisdn(unknown) does not exist
+-- Сигнатура в БД: app_fraud.get_clnt_by_msisdn(varchar)
+-- Напишите правильный SQL.
