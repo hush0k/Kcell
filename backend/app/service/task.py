@@ -4,14 +4,16 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache.redis_client import RedisCache
 from app.models import Task
 from app.models.task import Status
-from app.schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 
 
 class TaskService:
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.cache = RedisCache()
 
     async def create(self, task: TaskCreate, user_id: int) -> Task:
         db_task = Task(
@@ -25,8 +27,17 @@ class TaskService:
         return db_task
 
     async def get_by_id(self, task_id: int) -> Optional[Task]:
+        cached_task = await self.cache.get(str(task_id))
+        if cached_task:
+            return Task(**cached_task)
+
         result = await self.db.execute(select(Task).where(Task.id == task_id))
-        return result.scalar_one_or_none()
+        task = result.scalar_one_or_none()
+
+        if task:
+            await self.cache.set(str(task_id), TaskResponse.model_validate(task).model_dump())
+
+        return task
 
     async def get_all(self, user_id: int, task_status: Optional[Status] = None, limit: int = 100) -> list[Task]:
         query = select(Task).where(Task.user_id == user_id)

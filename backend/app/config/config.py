@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     db_host: str
     db_port: int = 5432
 
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
@@ -20,5 +23,9 @@ class Settings(BaseSettings):
             f"postgresql+asyncpg://{self.db_user}:{self.db_password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}"
 
 settings = Settings()
